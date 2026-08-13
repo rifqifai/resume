@@ -27,7 +27,7 @@
   function updateThemeMeta(theme) {
     var meta = document.querySelector('meta[name="theme-color"]');
     if (meta) {
-      meta.setAttribute("content", theme === "dark" ? "#0a0b14" : "#f6f7fb");
+      meta.setAttribute("content", theme === "dark" ? "#0b0a1a" : "#eef0fb");
     }
   }
 
@@ -196,6 +196,31 @@
   /* ---------- Footer year ---------- */
   var yearEl = document.getElementById("year");
   if (yearEl) yearEl.textContent = new Date().getFullYear();
+
+  /* ---------- Avatar border highlight follows cursor across the screen ---------- */
+  var avatar = document.querySelector(".about-image-card");
+  if (avatar && !prefersReducedMotion && window.matchMedia("(pointer: fine)").matches) {
+    var avatarTicking = false;
+    window.addEventListener("pointermove", function (e) {
+      if (avatarTicking) return;
+      avatarTicking = true;
+      requestAnimationFrame(function () {
+        var r = avatar.getBoundingClientRect();
+        // Project the cursor direction onto the ring so the glow always
+        // rides the border circle, even when the pointer is far away.
+        var cx = r.width / 2;
+        var cy = r.height / 2;
+        var dx = e.clientX - (r.left + cx);
+        var dy = e.clientY - (r.top + cy);
+        var dist = Math.sqrt(dx * dx + dy * dy) || 1;
+        var px = cx + (dx / dist) * cx;  // ring radius == width/2
+        var py = cy + (dy / dist) * cy;
+        avatar.style.setProperty("--mx", (px / r.width * 100).toFixed(1) + "%");
+        avatar.style.setProperty("--my", (py / r.height * 100).toFixed(1) + "%");
+        avatarTicking = false;
+      });
+    });
+  }
 
   /* ---------- Scroll handler (single passive listener) ---------- */
   window.addEventListener("scroll", onScrollHeader, { passive: true });
