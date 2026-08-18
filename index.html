@@ -45,9 +45,12 @@
         <li><a class="nav-link" href="#about">About</a></li>
         <li><a class="nav-link" href="#skills">Skills</a></li>
         <li><a class="nav-link" href="#experience">Experience</a></li>
-        <li><a class="nav-link" href="#projects">Projects</a></li>
+        <!-- <li><a class="nav-link" href="#projects">Projects</a></li> -->
         <li><a class="nav-link" href="#education">Education</a></li>
         <li><a class="nav-link" href="#contact">Contact</a></li>
+        <li class="nav-cta">
+          <a class="btn btn-primary btn-sm btn-resume" href="#">Download CV</a>
+        </li>
       </ul>
 
       <div class="nav-actions">
@@ -55,7 +58,7 @@
           <svg class="icon icon-sun" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32 1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
           <svg class="icon icon-moon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
         </button>
-        <a class="btn btn-primary btn-sm btn-resume" href="#contact">Hire Me</a>
+        <a class="btn btn-primary btn-sm btn-resume" href="#">Download CV</a>
         <button class="nav-burger" id="navBurger" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="navLinks">
           <span></span><span></span><span></span>
         </button>
@@ -110,12 +113,12 @@
         </p>
 
         <div class="hero-cta reveal">
-          <a class="btn btn-primary" href="#projects">View my work</a>
-          <a class="btn btn-ghost" href="#contact">Get in touch</a>
+          <a class="btn btn-primary" target="_blank" href="https://github.com/rifqifai">View My Works</a>
+          <a class="btn btn-ghost" target="_blank" href="https://scholar.google.com/citations?user=3c5LvGsAAAAJ&hl=en">View My Researches</a>
         </div>
 
         <ul class="hero-stats reveal" aria-label="Career highlights">
-          <li><strong>9+</strong><span>Years experience</span></li>
+          <li><strong>10+</strong><span>Years experience</span></li>
           <li><strong>4</strong><span>Companies &amp; institutions</span></li>
           <li><strong>6</strong><span>Core expertise areas</span></li>
         </ul>
@@ -132,7 +135,8 @@
         <div class="section-head reveal">
           <span class="section-eyebrow">About me</span>
           <h2 class="section-title">Turning ideas into <span class="gradient-text">digital products</span></h2>
-          <p class="section-desc">Software Engineer and Lecturer with extensive experience in web application development, frontend engineering, e-commerce platforms, and software engineering education.</p>
+          <p class="section-desc">Software Engineer and Lecturer specializing in web application development, frontend engineering, and e-commerce platforms, with expertise in React, Next.js, Magento 2, PWA, GraphQL, and Shopify. Passionate about building scalable software, solving complex technical challenges, enhancing user experience, and bridging industry practice with academic knowledge.
+</p>
         </div>
 
         <div class="about-grid">
@@ -236,6 +240,7 @@
 
     <!-- ============ EXPERIENCE ============ -->
     <section class="section" id="experience">
+      <canvas class="experience-canvas" id="experienceCanvas" aria-hidden="true"></canvas>
       <div class="container">
         <div class="section-head reveal">
           <span class="section-eyebrow">Experience</span>
@@ -404,7 +409,7 @@
     </section>
 
     <!-- ============ PROJECTS ============ -->
-    <section class="section section-alt" id="projects">
+    <!-- <section class="section section-alt" id="projects">
       <div class="container">
         <div class="section-head reveal">
           <span class="section-eyebrow">Professional Strengths</span>
@@ -492,10 +497,10 @@
           </article>
         </div>
       </div>
-    </section>
+    </section> -->
 
     <!-- ============ EDUCATION ============ -->
-    <section class="section" id="education">
+    <section class="section section-alt" id="education">
       <div class="container">
         <div class="section-head reveal">
           <span class="section-eyebrow">Education</span>

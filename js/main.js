@@ -224,4 +224,190 @@
 
   /* ---------- Scroll handler (single passive listener) ---------- */
   window.addEventListener("scroll", onScrollHeader, { passive: true });
+
+  /* ---------- Experience section: node/network canvas background ----------
+     Lightweight Canvas2D particle network (no video/GIF/Lottie/external
+     assets). Node count adapts to the section's area, connections are only
+     drawn between nearby nodes, and the whole thing pauses automatically
+     when off-screen, when the tab is hidden, or when the user has asked
+     for reduced motion — so it stays cheap on both desktop and mobile. */
+  (function initExperienceNetwork() {
+    var section = document.getElementById("experience");
+    var canvas = document.getElementById("experienceCanvas");
+    if (!section || !canvas) return;
+
+    if (prefersReducedMotion) {
+      // Static, non-animated placeholder — no canvas drawing, no rAF loop.
+      canvas.classList.add("is-static");
+      return;
+    }
+
+    var ctx = canvas.getContext("2d", { alpha: true });
+    if (!ctx) return;
+
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    var width = 0;
+    var height = 0;
+    var nodes = [];
+    var animId = null;
+    var running = false;
+    var isVisible = false;
+
+    // Palette pulled from the existing gradient tokens so it matches the
+    // site's theme instead of hardcoding unrelated colors.
+    var styles = getComputedStyle(document.documentElement);
+    function hexToRgb(hex) {
+      hex = (hex || "").trim().replace("#", "");
+      if (hex.length === 3) {
+        hex = hex.split("").map(function (c) { return c + c; }).join("");
+      }
+      var num = parseInt(hex, 16);
+      if (isNaN(num)) return { r: 139, g: 92, b: 246 };
+      return { r: (num >> 16) & 255, g: (num >> 8) & 255, b: num & 255 };
+    }
+    var palette = [
+      hexToRgb(styles.getPropertyValue("--grad-2")), // violet
+      hexToRgb(styles.getPropertyValue("--grad-3")), // indigo
+      hexToRgb(styles.getPropertyValue("--grad-5"))  // ocean blue
+    ];
+
+    var MAX_LINK_DIST = 140;
+    var MIN_NODES = 16;
+    var MAX_NODES = 70;
+
+    function nodeCountFor(w, h) {
+      var area = w * h;
+      var estimate = Math.round(area / 13000);
+      return Math.max(MIN_NODES, Math.min(MAX_NODES, estimate));
+    }
+
+    function makeNode() {
+      var speed = 0.18 + Math.random() * 0.28;
+      var angle = Math.random() * Math.PI * 2;
+      var color = palette[(Math.random() * palette.length) | 0];
+      return {
+        x: Math.random() * width,
+        y: Math.random() * height,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        r: 1.8 + Math.random() * 2.2, // bolder node size
+        color: color
+      };
+    }
+
+    function buildNodes() {
+      var target = nodeCountFor(width, height);
+      nodes = [];
+      for (var i = 0; i < target; i++) nodes.push(makeNode());
+    }
+
+    // Resize the canvas to match the section's rendered box, scaled for
+    // device pixel ratio so lines stay crisp without over-drawing.
+    function resize() {
+      var rect = section.getBoundingClientRect();
+      width = Math.max(1, Math.round(rect.width));
+      height = Math.max(1, Math.round(rect.height));
+      canvas.width = Math.round(width * dpr);
+      canvas.height = Math.round(height * dpr);
+      canvas.style.width = width + "px";
+      canvas.style.height = height + "px";
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      buildNodes();
+    }
+
+    function step() {
+      if (!running) return;
+      ctx.clearRect(0, 0, width, height);
+
+      // Update + draw nodes
+      for (var i = 0; i < nodes.length; i++) {
+        var n = nodes[i];
+        n.x += n.vx;
+        n.y += n.vy;
+        if (n.x <= 0 || n.x >= width) { n.vx *= -1; n.x = Math.max(0, Math.min(width, n.x)); }
+        if (n.y <= 0 || n.y >= height) { n.vy *= -1; n.y = Math.max(0, Math.min(height, n.y)); }
+      }
+
+      // Connections between nearby nodes (O(n^2) but n is capped ~70)
+      for (var a = 0; a < nodes.length; a++) {
+        for (var b = a + 1; b < nodes.length; b++) {
+          var na = nodes[a], nb = nodes[b];
+          var dx = na.x - nb.x;
+          var dy = na.y - nb.y;
+          var dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < MAX_LINK_DIST) {
+            var alpha = (1 - dist / MAX_LINK_DIST) * 0.35;
+            ctx.strokeStyle = "rgba(" + na.color.r + "," + na.color.g + "," + na.color.b + "," + alpha + ")";
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(na.x, na.y);
+            ctx.lineTo(nb.x, nb.y);
+            ctx.stroke();
+          }
+        }
+      }
+
+      // Draw nodes on top of their connections — emphasized with a soft
+      // glow so the "network node" reads clearly against the background.
+      for (var j = 0; j < nodes.length; j++) {
+        var node = nodes[j];
+        var glow = "rgba(" + node.color.r + "," + node.color.g + "," + node.color.b + ",0.9)";
+        ctx.save();
+        ctx.shadowColor = glow;
+        ctx.shadowBlur = 6;
+        ctx.beginPath();
+        ctx.fillStyle = "rgba(" + node.color.r + "," + node.color.g + "," + node.color.b + ",1)";
+        ctx.arc(node.x, node.y, node.r, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      animId = requestAnimationFrame(step);
+    }
+
+    function start() {
+      if (running) return;
+      running = true;
+      animId = requestAnimationFrame(step);
+    }
+
+    function stop() {
+      running = false;
+      if (animId) cancelAnimationFrame(animId);
+      animId = null;
+    }
+
+    // Only animate while the section is actually on screen.
+    if ("IntersectionObserver" in window) {
+      var visObserver = new IntersectionObserver(
+        function (entries) {
+          entries.forEach(function (entry) {
+            isVisible = entry.isIntersecting;
+            if (isVisible && document.visibilityState === "visible") start();
+            else stop();
+          });
+        },
+        { threshold: 0.01 }
+      );
+      visObserver.observe(section);
+    } else {
+      isVisible = true;
+      start();
+    }
+
+    document.addEventListener("visibilitychange", function () {
+      if (document.visibilityState === "visible" && isVisible) start();
+      else stop();
+    });
+
+    // Debounced resize so continuous window dragging doesn't thrash layout.
+    var resizeTimer = null;
+    function scheduleResize() {
+      if (resizeTimer) clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(resize, 150);
+    }
+    window.addEventListener("resize", scheduleResize);
+
+    resize();
+  })();
 })();
