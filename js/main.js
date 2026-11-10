@@ -124,8 +124,8 @@
     var phrases = [
       "Software Engineer",
       "Frontend Engineer",
-      "E-Commerce Engineer",
-      "UI Accessibility Advocate"
+      "Web & E-Commerce Technology",
+      "Lecturer"
     ];
     var phraseIndex = 0;
     var charIndex = 0;
